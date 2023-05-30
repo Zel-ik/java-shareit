@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final NotFoundException e){
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.info("Ошибка 404");
         return new ErrorResponse(e.getMessage(), "Не найдено");
     }

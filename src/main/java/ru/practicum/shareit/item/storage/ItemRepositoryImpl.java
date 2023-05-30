@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
-public class ItemRepositoryImpl implements ItemRepository{
+public class ItemRepositoryImpl implements ItemRepository {
     private Map<Long, Item> items = new HashMap<>();
     private long generator = 1;
 

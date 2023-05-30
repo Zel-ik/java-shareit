@@ -47,6 +47,7 @@ public class UserController {
         log.info(String.format("запрос 'Delete /users' от пользователя %d' получен", userId));
         userService.deleteUser(userId);
     }
+
     @GetMapping()
     public List<UserDto> getAllUsers() {
         log.info("запрос 'GET /users' получен");

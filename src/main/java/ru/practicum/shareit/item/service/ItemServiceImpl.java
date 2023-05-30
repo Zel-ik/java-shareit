@@ -10,7 +10,7 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final ItemRepositoryImpl repository;
 
     @Override

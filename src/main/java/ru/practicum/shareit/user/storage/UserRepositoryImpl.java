@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
-public class UserRepositoryImpl implements UserRepository{
+public class UserRepositoryImpl implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
     private long idCounter = 1;
 
