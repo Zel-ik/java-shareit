@@ -37,7 +37,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(value = USER_ID) Long userId, @RequestBody ItemDto itemDto,
+    public ItemDto updateItem(@RequestHeader(value = USER_ID) long userId, @RequestBody ItemDto itemDto,
                               @PathVariable long itemId) {
         log.info(String.format("Получен запрос 'PATCH /items/%d'", itemId));
         checkUser(userId);
