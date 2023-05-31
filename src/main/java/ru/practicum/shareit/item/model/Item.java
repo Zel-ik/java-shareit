@@ -1,29 +1,32 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Builder
+@EqualsAndHashCode
+@AllArgsConstructor
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Item {
-    private  Long id;
+    long id;
     @NotBlank
-    private String name;
+    String name;
     @NotBlank
     @Size(max = 75)
-    private String description;
-    @NotNull
-    private Boolean available; // доступность предмета
-    private User owner; // Хозяин предмета
-    private ItemRequest request; // запрос о создании
+    String description;
+    Boolean available; // доступность предмета
+    User owner; // Хозяин предмета
+    ItemRequest request; // запрос о создании
 
+    public Item(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

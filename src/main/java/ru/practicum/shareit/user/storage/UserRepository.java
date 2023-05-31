@@ -5,6 +5,9 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Collection;
 
 public interface UserRepository {
+
+    public void makeIdCounterToOne();
+
     User saveUser(User user);
 
     User getUserById(long userId);

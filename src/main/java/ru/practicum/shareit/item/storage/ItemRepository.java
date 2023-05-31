@@ -5,6 +5,9 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.Collection;
 
 public interface ItemRepository {
+
+    public void makeGeneratorToOne();
+
     Item addItem(Item item);
 
     Item updateItem(Item item, long itemId);
@@ -14,4 +17,6 @@ public interface ItemRepository {
     Collection<Item> getAllItem(long userId);
 
     Collection<Item> searchItem(String text);
+
+    void deleteItem(long id);
 }

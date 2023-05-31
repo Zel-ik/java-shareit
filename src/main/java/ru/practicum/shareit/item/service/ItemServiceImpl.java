@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.error.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepositoryImpl;
 
@@ -25,6 +26,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item updateItem(Item item, long itemId) {
+        checkItem(itemId);
         return repository.updateItem(item, itemId);
     }
 
@@ -39,5 +41,15 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         return repository.searchItem(text);
+    }
+
+    void checkItem(long itemId) {
+        Item item = repository.getItemById(itemId);
+        if (repository.getItemById(itemId) == null) {
+            throw new NotFoundException("Item with id " + itemId + " not found.");
+        }
+        if (item.getOwner() == null) {
+            throw new NotFoundException("Item with id " + itemId + " has no User(owner)");
+        }
     }
 }

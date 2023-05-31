@@ -1,18 +1,16 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
-    private Long id;
+    private long id;
     @NotBlank
     private String name;
     @NotBlank

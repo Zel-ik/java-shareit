@@ -16,6 +16,10 @@ public class ItemRepositoryImpl implements ItemRepository {
     private Map<Long, Item> items = new HashMap<>();
     private long generator = 1;
 
+    public void makeGeneratorToOne() {
+        generator = 1;
+    }
+
     @Override
     public Item addItem(Item item) {
         item.setId(generator);
@@ -59,5 +63,10 @@ public class ItemRepositoryImpl implements ItemRepository {
                 .filter(item -> (item.getName().toLowerCase().contains(text.toLowerCase())) ||
                         (item.getDescription().toLowerCase().contains(text.toLowerCase())))
                 .collect(Collectors.toList());
+    }
+
+
+    public void deleteItem(long id) {
+        items.remove(id);
     }
 }

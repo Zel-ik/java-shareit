@@ -13,6 +13,11 @@ public class UserRepositoryImpl implements UserRepository {
     private long idCounter = 1;
 
     @Override
+    public void makeIdCounterToOne(){
+        idCounter = 1;
+    }
+
+    @Override
     public Collection<User> getAllUsers() {
         return users.values();
     }
