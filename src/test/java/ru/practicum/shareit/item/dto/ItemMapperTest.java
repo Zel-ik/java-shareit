@@ -10,26 +10,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ItemMapperTest {
 
     @Test
-    void toUserDto(){
+    void toUserDto() {
         User user = new User(1, "Sasha", "Sasha@mail.ru");
         ItemRequest request = new ItemRequest();
         Item item = new Item(1, "Дрель", "Самая лучшая дрель в мире", true, user, request);
         ItemDto itemDto = ItemMapper.toDto(item);
-        assertEquals(itemDto.getName(),item.getName());
-        assertEquals(itemDto.getDescription(),item.getDescription());
-        assertEquals(itemDto.getRequest(),item.getRequest());
-        assertEquals(itemDto.getAvailable(),item.getAvailable());
+        assertEquals(itemDto.getName(), item.getName());
+        assertEquals(itemDto.getDescription(), item.getDescription());
+        assertEquals(itemDto.getRequest(), item.getRequest());
+        assertEquals(itemDto.getAvailable(), item.getAvailable());
     }
 
     @Test
-    void toItem(){
+    void toItem() {
         ItemRequest request = new ItemRequest();
         User user = new User(1, "Sasha", "Sasha@mail.ru");
         ItemDto itemDto = new ItemDto(1, "Дрель", "Самая лучшая дрель в мире", true, request);
         Item item = ItemMapper.toItem(itemDto, user);
-        assertEquals(itemDto.getName(),item.getName());
-        assertEquals(itemDto.getDescription(),item.getDescription());
-        assertEquals(itemDto.getRequest(),item.getRequest());
-        assertEquals(itemDto.getAvailable(),item.getAvailable());
+        assertEquals(itemDto.getName(), item.getName());
+        assertEquals(itemDto.getDescription(), item.getDescription());
+        assertEquals(itemDto.getRequest(), item.getRequest());
+        assertEquals(itemDto.getAvailable(), item.getAvailable());
     }
 }

@@ -13,7 +13,7 @@ public class UserRepositoryImpl implements UserRepository {
     private long idCounter = 1;
 
     @Override
-    public void makeIdCounterToOne(){
+    public void makeIdCounterToOne() {
         idCounter = 1;
     }
 
