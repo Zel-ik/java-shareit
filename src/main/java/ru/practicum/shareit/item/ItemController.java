@@ -2,85 +2,80 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.error.NotFoundException;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.validationgroup.Create;
 
-import javax.validation.Valid;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
-    private final UserService userService;
-    private static final String USER_ID = "X-Sharer-User-Id";
+    public static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemDto addItem(@RequestHeader(value = USER_ID) Long userId, @Valid @RequestBody ItemDto itemDto) {
-        log.info("Получен запрос 'POST /items'");
-        checkUser(userId);
-        User user = userService.getUserById(userId);
-        Item item = ItemMapper.toItem(itemDto, user);
-        return ItemMapper.toDto(itemService.addItem(item));
+    @ResponseStatus(HttpStatus.CREATED)
+    public ItemDto createItem(@RequestBody @Validated(Create.class) ItemDto itemDto,
+                              @RequestHeader(USER_ID_HEADER) long userId) {
+        ItemDto newItemDto = itemService.createItem(itemDto, userId);
+        log.info("Создан элемент: {}", newItemDto);
+        return newItemDto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(value = USER_ID) long userId, @RequestBody ItemDto itemDto,
-                              @PathVariable long itemId) {
-        log.info(String.format("Получен запрос 'PATCH /items/%d'", itemId));
-        checkUser(userId);
-        if (itemService.getItemById(itemId).getOwner().getId() != userId) {
-            throw new NotFoundException("Пользователь не является владельцем этой вещи");
-        }
-        User user = userService.getUserById(userId);
-        Item item = ItemMapper.toItem(itemDto, user);
-        return ItemMapper.toDto(itemService.updateItem(item, itemId));
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto updateItem(@PathVariable long itemId,
+                              @RequestBody ItemDto itemDto,
+                              @RequestHeader(USER_ID_HEADER) long ownerId) {
+        ItemDto updatedItemDto = itemService.updateItem(itemId, itemDto, ownerId);
+        log.info("Данные вещи с ID={} были обновлены: {}", itemId, updatedItemDto);
+        return updatedItemDto;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader(value = USER_ID) Long userId, @PathVariable long itemId) {
-        log.info(String.format("запрос 'GET /items/%d' получен", itemId));
-        checkUser(userId);
-        return ItemMapper.toDto(itemService.getItemById(itemId));
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto getItemById(@PathVariable long itemId,
+                               @RequestHeader(USER_ID_HEADER) long userId) {
+        log.info("Пользователем с ID={} запрошены данные вещи с ID={}", userId, itemId);
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItem(@RequestHeader(value = USER_ID) Long userId) {
-        log.info(String.format("запрос 'GET /items' от пользователя %d' получен", userId));
-        checkUser(userId);
-        Collection<Item> allItems = itemService.getAllItem(userId);
-        return allItems.stream()
-                .map(ItemMapper::toDto)
-                .collect(Collectors.toList());
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemDto> getUserItems(@RequestHeader(USER_ID_HEADER) long userId) {
+        log.info("Пользователь с ID={} запросил список своих вещей", userId);
+        return itemService.getUserItems(userId);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItem(@RequestHeader(value = USER_ID) Long userId, @RequestParam(name = "text") String text) {
-        log.info("запрос 'GET /items/search/?text=' получен" + text);
-        checkUser(userId);
-        return itemService.searchItem(text).stream()
-                .map(ItemMapper::toDto)
-                .collect(Collectors.toList());
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemDto> searchItem(@RequestParam("text") String searchRequest,
+                                    @RequestHeader(USER_ID_HEADER) long userId) {
+        log.info("Пользователь с ID={} пытался найти: \"{}\"", userId, searchRequest);
+        return itemService.searchItem(searchRequest, userId);
     }
 
-    private void checkUser(Long userId) {
-        if (userId == null) {
-            throw new NotFoundException("Пользователь не указан");
-        } else if (userService.getUserById(userId) == null) {
-            throw new NotFoundException("Указанный пользователь не сущетсвует");
-        }
+    @DeleteMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteItemById(@PathVariable long itemId,
+                               @RequestHeader(USER_ID_HEADER) long userId) {
+        itemService.deleteItemById(itemId, userId);
+        log.info("Вещь с ID={} удалена владельцем", itemId);
     }
 
+    @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.OK)
+    public CommentDto createComment(@RequestBody @Validated(Create.class) CommentDto comment,
+                                    @PathVariable long itemId,
+                                    @RequestHeader(USER_ID_HEADER) long commentatorId) {
+        CommentDto newComment = itemService.createComment(comment, itemId, commentatorId);
+        log.info("Пользователь с ID={} оставил комментарий вещи с ID={}", commentatorId, itemId);
+        return newComment;
+    }
 }
