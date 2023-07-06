@@ -2,62 +2,60 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.dto.BookingDto;
+import ru.practicum.shareit.booking.model.dto.BookingDtoIn;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.constans.State;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
-import static ru.practicum.shareit.item.ItemController.USER_ID_HEADER;
-
+/**
+ * TODO Sprint add-bookings.
+ */
 @RestController
-@RequestMapping(path = "/bookings")
+@RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
 public class BookingController {
     private final BookingService bookingService;
+    private static final String USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto createBooking(@RequestBody @Valid BookingDto bookingDto,
-                                    @RequestHeader(USER_ID_HEADER) long bookerId) {
-        BookingDto newBookingDto = bookingService.createBooking(bookingDto, bookerId);
-        log.info("Создан новый запрос на бронирование: {}", newBookingDto);
-        return newBookingDto;
+    public BookingDto saveBooking(@RequestHeader(value = USER_ID) Long userId, @Valid @RequestBody BookingDtoIn booking) {
+        log.info("Получен запрос 'POST /bookings'");
+        return bookingService.saveBooking(booking, userId);
     }
 
     @PatchMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
-    public BookingDto approveBooking(@PathVariable long bookingId,
-                                     @RequestParam boolean approved,
-                                     @RequestHeader(USER_ID_HEADER) long userId) {
-        BookingDto bookingDto = bookingService.approveBooking(bookingId, approved, userId);
-        log.info("Статус заявки на бронирование вещи с ID={} изменен на: {}", bookingId, approved);
-        return bookingDto;
+    public BookingDto confirmBooking(@RequestHeader(value = USER_ID) Long userId, @PathVariable Long bookingId, @RequestParam Boolean approved) {
+        log.info("Получен запрос 'Patch /bookings/{bookingId}'");
+        return bookingService.confirmBooking(approved, bookingId, userId);
     }
 
     @GetMapping("/{bookingId}")
-    @ResponseStatus(HttpStatus.OK)
-    public BookingDto getBookingById(@PathVariable long bookingId,
-                                     @RequestHeader(USER_ID_HEADER) long userId) {
-        log.info("Пользователем с ID={} запрошена заявка на бронирование с ID={}", userId, bookingId);
+    public BookingDto getBookingById(@RequestHeader(value = USER_ID) Long userId, @PathVariable Long bookingId) {
+        log.info("Получен запрос 'Get /bookings/{bookingId}'");
         return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<BookingDto> getUserBookingsByState(@RequestParam(defaultValue = "ALL") String state,
-                                                   @RequestHeader(USER_ID_HEADER) long userId) {
-        log.info("Пользователем с ID={} запрошены заявки на бронирование со статусом: {}", userId, state);
-        return bookingService.getBookingByUserIdAndState(userId, state);
+    public Collection<BookingDto> getAllBooking(@RequestHeader(value = USER_ID) Long userId,
+                                                @RequestParam(defaultValue = "ALL") State state,
+                                                @RequestParam(required = false) Integer from,
+                                                @RequestParam(required = false) Integer size) {
+        log.info("Получен запрос 'Get /bookings'");
+        return bookingService.getAllBooking(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    @ResponseStatus(HttpStatus.OK)
-    public List<BookingDto> getOwnerItemsByState(@RequestParam(defaultValue = "ALL") String state,
-                                                 @RequestHeader(USER_ID_HEADER) long ownerId) {
-        log.info("Пользователем с ID={} запросил список своих вещей со статусом: {}", ownerId, state);
-        return bookingService.getOwnerItemsByState(ownerId, state);
+    public Collection<BookingDto> getAllBookingForItems(@RequestHeader(value = USER_ID) Long userId,
+                                                        @RequestParam(defaultValue = "ALL") State state,
+                                                        @RequestParam(required = false) Integer from,
+                                                        @RequestParam(required = false) Integer size) {
+        log.info("Получен запрос 'Get /bookings/owner'");
+        return bookingService.getAllBookingForItems(userId, state, from, size);
     }
+
 }

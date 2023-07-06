@@ -1,35 +1,37 @@
 package ru.practicum.shareit.item.comment;
 
-import lombok.*;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-@Data
-@Builder
 @Entity
-@Table(name = "comments", schema = "public")
+@Data
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Table(name = "comments")
+@SuperBuilder
 public class Comment {
     @Id
-    @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", referencedColumnName = "item_id")
-    @ToString.Exclude
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "user_id")
-    @ToString.Exclude
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @Column(nullable = false)
