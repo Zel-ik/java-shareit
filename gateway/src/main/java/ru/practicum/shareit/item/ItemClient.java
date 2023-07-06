@@ -27,31 +27,41 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createComment(CommentDto commentDto, long userId, long itemId) {
-        return post("/" + itemId + "/comment", userId, commentDto);
-    }
-
-    public ResponseEntity<Object> createItem(ItemDto itemDto, long userId) {
+    public ResponseEntity<Object> createItem(Long userId, ItemDto itemDto) {
         return post("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> updateItem(ItemDto itemDto, long itemId, long userId) {
+    public ResponseEntity<Object> updateItem(Long userId, Long itemId, ItemDto itemDto) {
         return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> getItem(long itemId, long userId) {
+    public void deleteItem(Long userId, Long itemId) {
+        delete("/" + itemId, userId);
+    }
+
+    public ResponseEntity<Object> getItemById(Long userId, Long itemId) {
         return get("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> getItems(long userId) {
-        return get("", userId);
-    }
-
-
-    public ResponseEntity<Object> getItemsByText(String text, long userId) {
+    public ResponseEntity<Object> getUserItems(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
-                "text", text
+                "from", from,
+                "size", size
         );
-        return get("/search?text={text}", userId, parameters);
+        return get("?from={from}&size={size}", userId, parameters);
     }
+
+    public ResponseEntity<Object> searchItem(Long userId, String text, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of(
+                "text", text,
+                "from", from,
+                "size", size
+        );
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
+    }
+
+    public ResponseEntity<Object> createComment(Long userId, Long itemId, CommentDto commentDto) {
+        return post("/" + itemId + "/comment", userId, commentDto);
+    }
+
 }

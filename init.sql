@@ -1,2 +1,0 @@
-DROP DATABASE IF EXISTS shareit;
-CREATE DATABASE shareit;

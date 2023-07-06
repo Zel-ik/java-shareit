@@ -1,47 +1,61 @@
 package ru.practicum.shareit.exception;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
+import java.util.Map;
+
 @RestControllerAdvice
-@Slf4j
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse conflict(ConflictException e) {
-        log.warn("Получен статус 409 Conflict. Ошибка : {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse notFound(EntityNotFoundException e) {
-        log.warn("Получен статус 404 Not found. Ошибка : {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
+    public Map<String, String> handleNotFoundException(final EntityNotExistException e) {
+        return Map.of(
+                "error", "Not found",
+                "errorMessage", e.getMessage()
+        );
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse badRequest(BadRequestException e) {
-        log.warn("Получен статус 400 BadRequest. Ошибка : {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
+    public Map<String, String> handleOperationNotAllowedException(final OperationNotAllowed e) {
+        return Map.of(
+                "error", "Not allowed",
+                "errorMessage", e.getMessage()
+        );
     }
 
-    @Data
-    class ErrorResponse {
-        String error;
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleAlreadyExistException(final EntityAlreadyExistException e) {
+        return Map.of(
+                "error", "Already exist",
+                "errorMessage", e.getMessage()
+        );
+    }
 
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
+    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class, MissingRequestHeaderException.class, ConstraintViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleNotValidException(Exception e) {
+        return Map.of(
+                "error", "Not valid data",
+                "errorMessage", e.getMessage()
+        );
+    }
 
-        public String getError() {
-            return error;
-        }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleThrowable(Throwable e) {
+        e.printStackTrace();
+        return Map.of(
+                "error", "InternalServerError",
+                "errorMessage", "Произошла непредвиденная ошибка"
+        );
     }
 }

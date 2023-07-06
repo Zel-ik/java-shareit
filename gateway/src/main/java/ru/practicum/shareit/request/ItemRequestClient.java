@@ -26,24 +26,25 @@ public class ItemRequestClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createItemRequest(ItemRequestDto itemRequest, long userId) {
-        return post("", userId, itemRequest);
+    public ResponseEntity<Object> createRequest(Long userId, ItemRequestDto requestDto) {
+        return post("", userId, requestDto);
     }
 
-    public ResponseEntity<Object> getItemRequests(long userId) {
+    public ResponseEntity<Object> getRequestsByUser(Long userId) {
         return get("", userId);
     }
 
-    public ResponseEntity<Object> getItemWithPagination(long userId, int from, int size) {
+    public ResponseEntity<Object> getAllRequests(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size
         );
-
-        return get("/all", userId, parameters);
+        return get("/all?from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> getItemRequest(long requestId, long userId) {
+    public ResponseEntity<Object> getRequestById(Long userId, Long requestId) {
         return get("/" + requestId, userId);
     }
+
+
 }

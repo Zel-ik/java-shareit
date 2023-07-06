@@ -4,88 +4,46 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId ORDER BY b.startDate DESC")
-    List<Booking> findBookingsByBookerId(@Param("bookerId") Long bookerId, Pageable page);
+    List<Booking> findAllByBookerIdOrderByStartDesc(Long userId, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.endDate < :currentDate " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findPastBookingsByBookerId(@Param("bookerId") Long bookerId,
-                                             @Param("currentDate") LocalDateTime currentDate,
-                                             Pageable page);
+    List<Booking> findAllByBookerIdAndEndIsBeforeOrderByStartDesc(Long userId, LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.startDate >= :currentDate " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findFutureBookingsByBookerId(@Param("bookerId") Long bookerId,
-                                               @Param("currentDate") LocalDateTime currentDate,
-                                               Pageable page);
+    List<Booking> findAllByBookerIdAndStartIsAfterOrderByStartDesc(Long userId, LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = :waitingStatus " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findWaitingBookingsByBookerId(@Param("bookerId") Long bookerId,
-                                                @Param("waitingStatus") BookingStatus waitingStatus,
-                                                Pageable page);
+    List<Booking> findAllByBookerIdAndStatus(Long userId, BookingStatus waiting, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = :rejectedStatus " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findRejectedBookingsByBookerId(@Param("bookerId") Long bookerId,
-                                                 @Param("rejectedStatus") BookingStatus rejectedStatus,
-                                                 Pageable page);
+    @Query("select b from Booking b where b.booker.id = :userId and b.start < :now and b.end > :now order by b.start DESC")
+    List<Booking> findAllByBookerCurrentDate(@Param("userId") Long userId, @Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.startDate <= :currentDate " +
-            "AND b.endDate >= :currentDate ORDER BY b.startDate DESC")
-    List<Booking> findCurrentBookingsByBookerId(@Param("bookerId") Long bookerId,
-                                                @Param("currentDate") LocalDateTime currentDate,
-                                                Pageable page);
+    @Query("select b from Booking b where b.item.owner.id = :userId order by b.start DESC")
+    List<Booking> findAllByOwnerId(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.user.id = :ownerId ORDER BY b.startDate DESC")
-    List<Booking> findByItemOwnerIdOrderByStartDateDesc(@Param("ownerId") Long ownerId,
-                                                        Pageable page);
+    @Query("select b from Booking b where b.item.owner.id = :userId and b.end < :now order by b.start DESC")
+    List<Booking> findAllByOwnerIdAndEndIsBefore(@Param("userId") Long userId, @Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.user.id = :ownerId AND b.status = :status ORDER BY b.startDate DESC")
-    List<Booking> findByItemOwnerIdAndStatusOrderByStartDateDesc(@Param("ownerId") Long ownerId,
-                                                                 @Param("status") BookingStatus status,
-                                                                 Pageable page);
+    @Query("select b from Booking b where b.item.owner.id = :userId and b.start > :now order by b.start DESC")
+    List<Booking> findAllByOwnerIdAndStartIsAfter(@Param("userId") Long userId, @Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.user.id = :ownerId AND b.endDate < :currentDate " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findPastBookingsByItemOwnerIdOrderByStartDateDesc(@Param("ownerId") Long ownerId,
-                                                                    @Param("currentDate") LocalDateTime currentDate,
-                                                                    Pageable page);
+    @Query("select b from Booking b where b.item.owner.id = :userId and b.start < :now and b.end > :now order by b.start DESC")
+    List<Booking> findAllByOwnerCurrentDate(@Param("userId") Long userId, @Param("now") LocalDateTime now, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.user.id = :ownerId AND b.startDate >= :currentDate " +
-            "ORDER BY b.startDate DESC")
-    List<Booking> findFutureBookingsByItemOwnerIdOrderByStartDateDesc(@Param("ownerId") Long ownerId,
-                                                                      @Param("currentDate") LocalDateTime currentDate,
-                                                                      Pageable page);
+    @Query("select b from Booking b where b.item.owner.id = :userId and b.status = :status order by b.start DESC")
+    List<Booking> findAllByOwnerIdAndStatus(@Param("userId") Long userId, @Param("status") BookingStatus waiting, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.user.id = :ownerId AND b.startDate <= :currentDate " +
-            "AND b.endDate >= :currentDate ORDER BY b.startDate DESC")
-    List<Booking> findCurrentBookingsByItemOwnerIdOrderByStartDateDesc(@Param("ownerId") Long ownerId,
-                                                                       @Param("currentDate") LocalDateTime currentDate,
-                                                                       Pageable page);
+    @Query("select b from Booking b where b.item.id = :itemId and b.start < :start and b.status = 'APPROVED' order by b.end DESC")
+    List<Booking> findItemLastBookings(@Param("itemId") Long itemId, @Param("start") LocalDateTime start);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.status = 'APPROVED' " +
-            "AND b.startDate < :currentDate ORDER BY b.startDate DESC")
-    List<Booking> findLastBookingsByItemId(@Param("itemId") Long itemId,
-                                           @Param("currentDate") LocalDateTime currentDate);
+    @Query("select b from Booking b where b.item.id = :itemId and b.start > :start and b.status = 'APPROVED' order by b.start")
+    List<Booking> findItemNextBookings(@Param("itemId") Long itemId, @Param("start") LocalDateTime start);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.id = :itemId AND b.status = 'APPROVED' " +
-            "AND b.startDate > :currentDate ORDER BY b.startDate")
-    List<Booking> findNextBookingsByItemId(@Param("itemId") Long itemId,
-                                           @Param("currentDate") LocalDateTime currentDate);
-
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.item.id = :itemId " +
-            "AND b.endDate < :currentDate ORDER BY b.startDate DESC")
-    List<Booking> findPastBookingsByBookerIdAndItemId(@Param("bookerId") Long bookerId,
-                                                      @Param("itemId") Long itemId,
-                                                      @Param("currentDate") LocalDateTime currentDate);
+    Optional<Booking> findFirstByBookerAndItemIdAndEndBefore(User booker, Long itemId, LocalDateTime date);
 }

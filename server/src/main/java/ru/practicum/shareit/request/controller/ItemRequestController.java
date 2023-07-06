@@ -1,42 +1,43 @@
 package ru.practicum.shareit.request.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.model.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
 
-import static ru.practicum.shareit.item.controller.ItemController.X_SHARER_USER_ID;
+import static ru.practicum.shareit.item.controller.ItemController.USER_HEADER;
 
 @RestController
 @RequestMapping(path = "/requests")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ItemRequestController {
-
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public ItemRequestDto createItemRequest(@RequestBody ItemRequestDto itemRequest,
-                                            @RequestHeader(X_SHARER_USER_ID) long userId) {
-        return itemRequestService.createItemRequest(itemRequest, userId);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ItemRequestDto createRequest(@RequestHeader(USER_HEADER) Long userId,
+                                        @RequestBody ItemRequestDto itemRequestDto) {
+        return itemRequestService.createRequest(userId, itemRequestDto);
     }
 
     @GetMapping
-    public List<ItemRequestDto> getOwnerRequests(@RequestHeader(X_SHARER_USER_ID) long userId) {
-        return itemRequestService.getItemRequests(userId);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemRequestDto> getRequestsByUser(@RequestHeader(USER_HEADER) Long userId) {
+        return itemRequestService.getRequestsByUser(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> getOtherRequests(@RequestHeader(X_SHARER_USER_ID) long userId,
-                                                 @RequestParam(name = "from", defaultValue = "0") int from,
-                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
-        return itemRequestService.getItemWithPagination(userId, from, size);
+    public List<ItemRequestDto> getAllRequests(@RequestHeader(USER_HEADER) Long userId,
+                                               @RequestParam(defaultValue = "0") Integer from,
+                                               @RequestParam(defaultValue = "10") Integer size) {
+        return itemRequestService.getAllRequests(userId, from, size);
     }
 
-    @GetMapping("{requestId}")
-    public ItemRequestDto getRequest(@RequestHeader(X_SHARER_USER_ID) long userId,
-                                     @PathVariable long requestId) {
-        return itemRequestService.getItemRequest(requestId, userId);
+    @GetMapping("/{requestId}")
+    public ItemRequestDto getRequest(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long requestId) {
+        return itemRequestService.getRequestById(userId, requestId);
     }
 }

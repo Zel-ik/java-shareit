@@ -3,49 +3,49 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.validateInterfaces.Create;
-import ru.practicum.shareit.validateInterfaces.Update;
+import ru.practicum.shareit.validationgroup.CreateGroup;
+import ru.practicum.shareit.validationgroup.UpdateGroup;
 
-@Controller
+
+@RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class UserController {
     private final UserClient userClient;
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody @Validated(Create.class) UserDto userDto) {
-        log.info("User create with user {}", userDto);
+    public ResponseEntity<Object> createUser(@RequestBody @Validated(CreateGroup.class) UserDto userDto) {
+        log.info("Creating user {}", userDto);
         return userClient.createUser(userDto);
     }
 
+    @PatchMapping("/{userId}")
+    public ResponseEntity<Object> updateUser(@PathVariable Long userId, @RequestBody @Validated(UpdateGroup.class) UserDto userDto) {
+        log.info("Updating user {}, userId={}", userDto, userId);
+        return userClient.updateUser(userId, userDto);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Long userId) {
+        log.info("Deleting user, userId={}", userId);
+        userClient.deleteUser(userId);
+    }
+
     @GetMapping("/{userId}")
-    public ResponseEntity<Object> getUser(@PathVariable long userId) {
-        log.info("User get with userId = {}", userId);
-        return userClient.getUser(userId);
+    public ResponseEntity<Object> getUserById(@PathVariable Long userId) {
+        log.info("Get user with userId={}", userId);
+        return userClient.getUserById(userId);
     }
 
     @GetMapping
     public ResponseEntity<Object> getUsers() {
-        log.info("User create with users");
+        log.info("Get users");
         return userClient.getUsers();
     }
 
-    @PatchMapping("/{userId}")
-    public ResponseEntity<Object> updateUser(@RequestBody @Validated(Update.class) UserDto userDto,
-                                             @PathVariable long userId) {
-        log.info("User update with user {}, userId = {}", userDto, userId);
-        return userClient.updateUser(userDto, userId);
-    }
-
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> deleteUser(@PathVariable long userId) {
-        log.info("User delete with userId = {}", userId);
-        return userClient.deleteUser(userId);
-    }
 }
-
