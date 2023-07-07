@@ -3,6 +3,7 @@ services:
   gateway:
     build: gateway
     container_name: gateway
+    restart: on-failure
     ports:
       - "8080:8080"
     depends_on:
